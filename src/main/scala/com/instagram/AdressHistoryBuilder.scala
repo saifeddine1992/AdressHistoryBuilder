@@ -45,9 +45,9 @@ object AddressHistoryBuilder {
 
 
     val newRecordsToBeAdded = update.join(historyThatMatters, historyThatMatters("id") === update("id"), "leftanti")
-    val toBeaddedRecord = newRecordsToBeAdded.withColumn("moved_out", lit(null)).withColumn("current", lit(true))
+    val addedRecord = newRecordsToBeAdded.withColumn("moved_out", lit(null)).withColumn("current", lit(true))
 
-    val additions = rowsAdded2.union(rowsAdded).union(rowsAdded1).union(rowsFixed).union(toBeaddedRecord)
+    val additions = rowsAdded2.union(rowsAdded).union(rowsAdded1).union(rowsFixed).union(addedRecord)
     val toBeRemoved = rowsToBeRemoved.union(rowsToBeRemoved1)
     history.union(additions).except(toBeRemoved)
   }
