@@ -11,10 +11,11 @@ import java.time.format.DateTimeFormatter
 
 case class AddressHistory
 (id: Long, first_name: String, last_name: String, address: String, moved_in: LocalDate, moved_out: LocalDate, current: Boolean)
+
 case class addressUpdates(id: Long, first_name: String, last_name: String, address: String, moved_in: LocalDate)
 
 
-class AddressHistoryBuilderSpec  extends AnyFlatSpec with Matchers with GivenWhenThen {
+class AddressHistoryBuilderSpec extends AnyFlatSpec with Matchers with GivenWhenThen {
   val spark = SparkSession.builder
     .master("local[*]")
     .appName("History builer App")
@@ -28,23 +29,25 @@ class AddressHistoryBuilderSpec  extends AnyFlatSpec with Matchers with GivenWhe
     AddressHistory(1, "Sayf", "Bouazizi", "Kasserine", LocalDate.parse("21-11-1960", pattern), LocalDate.parse("21-11-1961", pattern), false),
     AddressHistory(3, "oussama", "banana", "Frigya", LocalDate.parse("21-11-2015", pattern), null, true),
     AddressHistory(2, "jasser", "rtibi", "amsterdam", LocalDate.parse("21-11-2020", pattern), null, true),
-    AddressHistory(4, "houssem", "Dalhoumi", "zalfén" , LocalDate.parse("21-11-1960", pattern) , null , true)
+    AddressHistory(4, "houssem", "Dalhoumi", "zalfén", LocalDate.parse("21-11-1960", pattern), null, true)
   ).toDF()
 
   val historyUpdate = Seq(
     addressUpdates(1, "Sayf", "Bouazizi", "Sousse", LocalDate.parse("06-06-2017", pattern)),
     addressUpdates(3, "oussama", "banana", "Frigya", LocalDate.parse("21-11-2013", pattern)),
-    addressUpdates(2, "jasser", "rtibi", "USA" , LocalDate.parse("21-11-1992", pattern)),
-    addressUpdates(4, "houssem", "Dalhoumi", "zalfén" , LocalDate.parse("21-11-1992", pattern))
+    addressUpdates(2, "jasser", "rtibi", "USA", LocalDate.parse("21-11-1992", pattern)),
+    addressUpdates(4, "houssem", "Dalhoumi", "zalfén", LocalDate.parse("21-11-1992", pattern)),
+    addressUpdates(5, "badr", "Dalhoumi", "maroc", LocalDate.parse("21-11-1978", pattern))
 
   ).toDF()
 
   val expectedResult = Seq(
     AddressHistory(3, "oussama", "banana", "Frigya", LocalDate.parse("21-11-2013", pattern), null, true),
-    AddressHistory(1, "Sayf", "Bouazizi", "Sousse", LocalDate.parse("06-06-2017", pattern), null , true),
-    AddressHistory(1,"Sayf", "Bouazizi", "Kasserine", LocalDate.parse("21-11-1992", pattern), LocalDate.parse("06-06-2017", pattern), false),
+    AddressHistory(1, "Sayf", "Bouazizi", "Sousse", LocalDate.parse("06-06-2017", pattern), null, true),
+    AddressHistory(1, "Sayf", "Bouazizi", "Kasserine", LocalDate.parse("21-11-1992", pattern), LocalDate.parse("06-06-2017", pattern), false),
     AddressHistory(1, "Sayf", "Bouazizi", "Kasserine", LocalDate.parse("21-11-1960", pattern), LocalDate.parse("21-11-1961", pattern), false),
-    AddressHistory(4, "houssem", "Dalhoumi", "zalfén" , LocalDate.parse("21-11-1960", pattern) , null , true),
+    AddressHistory(4, "houssem", "Dalhoumi", "zalfén", LocalDate.parse("21-11-1960", pattern), null, true),
+    AddressHistory(5, "badr", "Dalhoumi", "maroc", LocalDate.parse("21-11-1978", pattern), null, true),
     AddressHistory(2, "jasser", "rtibi", "amsterdam", LocalDate.parse("21-11-2020", pattern), null, true),
     AddressHistory(2, "jasser", "rtibi", "USA", LocalDate.parse("21-11-1992", pattern), LocalDate.parse("21-11-2020", pattern), false)
   ).toDF()
@@ -56,6 +59,6 @@ class AddressHistoryBuilderSpec  extends AnyFlatSpec with Matchers with GivenWhe
     When("AddressHistoryBuilder is Invoked")
     val result = addressHistoryBuilder(History, update)
     Then("the address history should be updated")
-    expectedResult.collect() should contain theSameElementsAs(result.collect())
+    expectedResult.collect() should contain theSameElementsAs (result.collect())
   }
 }
