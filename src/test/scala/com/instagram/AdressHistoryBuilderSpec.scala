@@ -25,6 +25,7 @@ class AddressHistoryBuilderSpec  extends AnyFlatSpec with Matchers with GivenWhe
   val pattern = DateTimeFormatter.ofPattern("dd-MM-yyyy")
   val adressHistory = Seq(
     AddressHistory(1, "Sayf", "Bouazizi", "Kasserine", LocalDate.parse("21-11-1992", pattern), null, true),
+    AddressHistory(1, "Sayf", "Bouazizi", "Kasserine", LocalDate.parse("21-11-1960", pattern), LocalDate.parse("21-11-1961", pattern), false),
     AddressHistory(2, "jasser", "rtibi", "amsterdam", LocalDate.parse("21-11-2020", pattern), null, true)).toDF()
 
   val historyUpdate = Seq(
@@ -35,6 +36,7 @@ class AddressHistoryBuilderSpec  extends AnyFlatSpec with Matchers with GivenWhe
   val expectedResult = Seq(
     AddressHistory(1, "Sayf", "Bouazizi", "Sousse", LocalDate.parse("06-06-2017", pattern), null , true),
     AddressHistory(1,"Sayf", "Bouazizi", "Kasserine", LocalDate.parse("21-11-1992", pattern), LocalDate.parse("06-06-2017", pattern), false),
+    AddressHistory(1, "Sayf", "Bouazizi", "Kasserine", LocalDate.parse("21-11-1960", pattern), LocalDate.parse("21-11-1961", pattern), false),
     AddressHistory(2, "jasser", "rtibi", "amsterdam", LocalDate.parse("21-11-2020", pattern), null, true),
     AddressHistory(2, "jasser", "rtibi", "USA", LocalDate.parse("21-11-1992", pattern), LocalDate.parse("21-11-2020", pattern), false)
   ).toDF()
