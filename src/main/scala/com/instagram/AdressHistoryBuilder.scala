@@ -25,8 +25,8 @@ object AddressHistoryBuilder {
         val rowsToBeRemoved = recordAddedOnDifferentAdressWithDateCondition1.drop("new_address", "new_moved_in")
 
 
-    val oldRecordAddedOnDifferentAdressWithDateCondition2 = newRecordAddedOnDifferentAdress.where(col("new_moved_in")  < col("moved_in"))
-    val rowsAdded = oldRecordAddedOnDifferentAdressWithDateCondition2
+    val recordAddedOnDifferentAdressWithDateCondition2 = newRecordAddedOnDifferentAdress.where(col("new_moved_in")  < col("moved_in"))
+    val rowsAdded = recordAddedOnDifferentAdressWithDateCondition2
           .withColumn("moved_out", col("moved_in"))
           .withColumn("current", lit(false))
           .withColumn("moved_in", col("new_moved_in"))
@@ -34,8 +34,8 @@ object AddressHistoryBuilder {
           .drop("new_address", "new_moved_in")
 
 
-val newRecordAddedOnSameAdress = joinedHistoryAndUpdate.where(col("new_address") === col("address"))
-    val recordAddedOnSameAdressWithDateCondition = newRecordAddedOnSameAdress.where(col("new_moved_in")  < col("moved_in"))
+val recordAddedOnSameAdress = joinedHistoryAndUpdate.where(col("new_address") === col("address"))
+    val recordAddedOnSameAdressWithDateCondition = recordAddedOnSameAdress.where(col("new_moved_in")  < col("moved_in"))
 
     val rowsAdded2 = recordAddedOnSameAdressWithDateCondition
       .withColumn("moved_in", col("new_moved_in"))
@@ -43,6 +43,9 @@ val newRecordAddedOnSameAdress = joinedHistoryAndUpdate.where(col("new_address")
     val rowsToBeRemoved1 = recordAddedOnSameAdressWithDateCondition.drop("new_address", "new_moved_in")
     val additions = rowsAdded2.union(rowsAdded).union(rowsAdded1).union(rowsFixed)
     val toBeRemoved = rowsToBeRemoved.union(rowsToBeRemoved1)
+
+
+
     history.union(additions).except(toBeRemoved)
   }
 }
