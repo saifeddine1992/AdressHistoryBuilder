@@ -75,8 +75,17 @@ object AddressHistoryBuilder {
 
 
 
-    val additions = rowsAdded2.union(rowsAdded).union(rowsAdded1).union(rowsFixed).union(addedRecord).union(rowAddedd1).union(rowsAddedd2)
-    val toBeRemoved = rowsToBeRemoved.union(rowsToBeRemoved1).union(rowtoberemovedd).union(rowstoberemovedd1)
+    val interval2 = joinedAdditionWithLeftHouses.where(col("moved_in") < col("old_moved_in"))
+    val rowAddedAgain = interval2.withColumn("moved_out" , col("old_moved_in"))
+      .drop("old_address" , "old_moved_in" , "old_moved_out").sort("moved_out").dropDuplicates("moved_in")
+    val rowsToBeOmmited = interval2.drop("old_address" , "old_moved_in" , "old_moved_out")
+
+
+
+
+
+    val additions = rowsAdded2.union(rowsAdded).union(rowsAdded1).union(rowsFixed).union(addedRecord).union(rowAddedd1).union(rowsAddedd2).union(rowAddedAgain)
+    val toBeRemoved = rowsToBeRemoved.union(rowsToBeRemoved1).union(rowtoberemovedd).union(rowstoberemovedd1).union(rowsToBeOmmited)
     history.union(additions).except(toBeRemoved)
   }
 }
