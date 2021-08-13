@@ -88,12 +88,12 @@ class AddressHistoryBuilderSpec extends AnyFlatSpec with Matchers with GivenWhen
     AddressHistory(1, "Sayf", "Bouazizi", "Frigya", LocalDate.parse("21-11-2017", pattern), LocalDate.parse("21-11-2018", pattern), false)
   ).toDF()
 
-  val addreshistorynormal = Seq(
+  val addreshistory = Seq(
     AddressHistory(1, "Sayf", "Bouazizi", "Kasserine", LocalDate.parse("21-11-2020", pattern), null, true),
     AddressHistory(1, "Sayf", "Bouazizi", "amsterdam", LocalDate.parse("21-11-2015", pattern), LocalDate.parse("21-11-2019", pattern), false),
     AddressHistory(1, "Sayf", "Bouazizi", "France", LocalDate.parse("21-11-2019", pattern), LocalDate.parse("21-11-2020", pattern), false)
   ).toDF()
-  val historyUpdatethatiswaytooùmuchinthepast = Seq(
+  val historyUpdatethatisTheFurthestInThePast = Seq(
     addressUpdates(1, "Sayf", "Bouazizi", "Sousse", LocalDate.parse("21-11-1960", pattern))
   ).toDF()
   val expectedcase = Seq(
@@ -116,8 +116,8 @@ class AddressHistoryBuilderSpec extends AnyFlatSpec with Matchers with GivenWhen
     val update4 = individualsThatDoNotHaveHistory
     val history5 = adressHistoryOfLeftHouses
     val update5 = historyUpdatesThatOverlapsWithoutOldHistory
-    val lastcasehistory =addreshistorynormal
-    val lastupdate = historyUpdatethatiswaytooùmuchinthepast
+    val history6 = addreshistory
+    val update6 = historyUpdatethatisTheFurthestInThePast
 
     When("AddressHistoryBuilder is Invoked")
     val result = addressHistoryBuilder(History, update)
@@ -126,7 +126,7 @@ class AddressHistoryBuilderSpec extends AnyFlatSpec with Matchers with GivenWhen
     val result3 = addressHistoryBuilder(history3, update3)
     val result4 = addressHistoryBuilder(history4, update4)
     val result5 = addressHistoryBuilder(history5, update5)
-    val lastresult = addressHistoryBuilder(lastcasehistory, lastupdate)
+    val result6 = addressHistoryBuilder(history6, update6)
 
     Then("the address history should be updated")
     expectedResultOfNewRecordAddedOnSameAddress.collect() should contain theSameElementsAs (result.collect())
@@ -135,6 +135,6 @@ class AddressHistoryBuilderSpec extends AnyFlatSpec with Matchers with GivenWhen
     expectedResultOfOldRecordAddedOnSameAddress.collect() should contain theSameElementsAs (result3.collect())
     expectedResultOfNewOnHistory.collect() should contain theSameElementsAs (result4.collect())
     expectedResultOfOverlap.collect() should contain theSameElementsAs (result5.collect())
-    expectedcase.collect() should contain theSameElementsAs(lastresult.collect())
+    expectedcase.collect() should contain theSameElementsAs(result6.collect())
   }
 }
