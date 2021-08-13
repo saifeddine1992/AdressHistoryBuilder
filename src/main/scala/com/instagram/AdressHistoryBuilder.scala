@@ -5,10 +5,12 @@ import org.apache.spark.sql.functions.{col, lit}
 
 
 object AddressHistoryBuilder {
-  def addressHistoryBuilder(history: DataFrame, update: DataFrame): DataFrame = {
+  def addressHistoryBuilder (history: DataFrame, update: DataFrame): DataFrame = {
 
-    val renamedUpdateFields = update.withColumnRenamed("address", "new_address")
-      .withColumnRenamed("moved_in", "new_moved_in").select("id", "new_address", "new_moved_in")
+    val renamedUpdateFields = update
+      .withColumnRenamed("address", "new_address")
+      .withColumnRenamed("moved_in", "new_moved_in")
+      .select("id", "new_address", "new_moved_in")
 
     val historyThatMatters = history.where(col("current") === true)
     val historyWithHousesLeft = history.where(col("current") === false)
@@ -19,7 +21,6 @@ object AddressHistoryBuilder {
 
 
     val joinedHistoryAndUpdate = historyThatMatters.join(renamedUpdateFields, "id")
-
 
     val newRecordAddedOnDifferentAdress = joinedHistoryAndUpdate.where(col("new_address") =!= col("address"))
 
@@ -58,30 +59,36 @@ object AddressHistoryBuilder {
 
 
     val newRecordsToBeAdded = update.join(historyThatMatters, historyThatMatters("id") === update("id"), "leftanti")
-    val rowsAdded3 = newRecordsToBeAdded.withColumn("moved_out", lit(null)).withColumn("current", lit(true))
+    val rowsAdded3 = newRecordsToBeAdded
+      .withColumn("moved_out", lit(null))
+      .withColumn("current", lit(true))
 
 
 
     val joinedAdditionWithLeftHouses = rowsAdded.join(historyWithHousesLeft , "id")
     val interval1 = joinedAdditionWithLeftHouses.where(col("moved_in") > col("old_moved_in"))
     val case1 = interval1.where(col("moved_in") < col("old_moved_out"))
-    val rowAdded4 = case1.withColumn("moved_out" , col("old_moved_out"))
+    val rowAdded4 = case1
+      .withColumn("moved_out" , col("old_moved_out"))
       .drop("old_address" , "old_moved_in" , "old_moved_out")
     val rowsAdded5 = case1
       .withColumn("moved_out" , col("moved_in"))
       .withColumn("moved_in" , col("old_moved_in"))
       .withColumn("address" , col("old_address")).drop("old_address" , "old_moved_in" , "old_moved_out")
-    val rowsToBeRemoved2 = case1.withColumn("moved_in" , col("old_moved_in"))
+    val rowsToBeRemoved2 = case1
+      .withColumn("moved_in" , col("old_moved_in"))
       .withColumn("moved_out" , col("old_moved_out"))
-      .withColumn("address" , col("old_address")).drop("old_address" , "old_moved_in" , "old_moved_out")
+      .withColumn("address" , col("old_address"))
+      .drop("old_address" , "old_moved_in" , "old_moved_out")
     val rowsToBeRemoved3 = case1.drop("old_address" , "old_moved_in" , "old_moved_out")
 
 
-
-
     val interval2 = joinedAdditionWithLeftHouses.where(col("moved_in") < col("old_moved_in"))
-    val rowsAdded6 = interval2.withColumn("moved_out" , col("old_moved_in"))
-      .drop("old_address" , "old_moved_in" , "old_moved_out").sort("moved_out").dropDuplicates("moved_in")
+    val rowsAdded6 = interval2
+      .withColumn("moved_out" , col("old_moved_in"))
+      .drop("old_address" , "old_moved_in" , "old_moved_out")
+      .sort("moved_out")
+      .dropDuplicates("moved_in")
     val rowsToBeRemoved4 = interval2.drop("old_address" , "old_moved_in" , "old_moved_out")
 
 
