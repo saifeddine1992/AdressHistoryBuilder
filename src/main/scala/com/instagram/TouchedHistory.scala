@@ -1,7 +1,7 @@
 package com.instagram
 
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.functions.{col, lit}
 
 object TouchedHistory {
   def getTouchedHistoryForNewArrivingData(history: DataFrame, update: DataFrame): DataFrame = {
@@ -59,6 +59,77 @@ object TouchedHistory {
     val updatesOlderThanAllOfHistory = joinedAdditionWithLeftHouses.where(col("moved_in") < col("old_moved_in"))
     updatesOlderThanAllOfHistory
   }
-
+  def getAddedOnDifferentAddress(newArrivingDataOnDifferentAddress:DataFrame ): DataFrame = {
+    newArrivingDataOnDifferentAddress
+      .withColumn("moved_out", col("new_moved_in"))
+      .withColumn("current", lit(false))
+      .drop("new_address", "new_moved_in")
+  }
+  def getNewCurrentRowsAdded(newArrivingDataOnDifferentAddress:DataFrame) : DataFrame = {
+    newArrivingDataOnDifferentAddress
+      .withColumn("address", col("new_address"))
+      .withColumn("moved_in", col("new_moved_in"))
+      .drop("new_address", "new_moved_in")
+  }
+  def getOldCurrentRowsToBeRemoved(newArrivingDataOnDifferentAddress:DataFrame): DataFrame = {
+    newArrivingDataOnDifferentAddress
+      .drop("new_address", "new_moved_in")
+  }
+  def getPotentiallyAddedRows(lateArrivingDataOnDifferentAddress : DataFrame) : DataFrame = {
+    lateArrivingDataOnDifferentAddress
+      .withColumn("moved_out", col("moved_in"))
+      .withColumn("current", lit(false))
+      .withColumn("moved_in", col("new_moved_in"))
+      .withColumn("address", col("new_address"))
+      .drop("new_address", "new_moved_in")
+  }
+  def getRowsAddedOnSameAddress(lateArrivingDataOnSameAddress : DataFrame): DataFrame = {
+    lateArrivingDataOnSameAddress
+      .withColumn("moved_in", col("new_moved_in"))
+      .drop("new_address", "new_moved_in")
+  }
+  def getRowsRemovedOnSameAddress(lateArrivingDataOnSameAddress : DataFrame) : DataFrame = {
+    lateArrivingDataOnSameAddress
+      .drop("new_address", "new_moved_in")
+  }
+  def buildNewPeopleRows(newPeopleOnHistory: DataFrame): DataFrame = {
+    newPeopleOnHistory
+      .withColumn("moved_out", lit(null))
+      .withColumn("current", lit(true))
+  }
+  def buildRowsOfUpdateAdded(updateThatOverlapsWithLateHistory: DataFrame): DataFrame = {
+    updateThatOverlapsWithLateHistory
+      .withColumn("moved_out" , col("old_moved_out"))
+      .drop("old_address" , "old_moved_in" , "old_moved_out")
+  }
+  def buildRowsOfHistoryCorrected(updateThatOverlapsWithLateHistory: DataFrame): DataFrame={
+    updateThatOverlapsWithLateHistory
+      .withColumn("moved_out" , col("moved_in"))
+      .withColumn("moved_in" , col("old_moved_in"))
+      .withColumn("address" , col("old_address"))
+      .drop("old_address" , "old_moved_in" , "old_moved_out")
+  }
+  def buildOldRowsOfHistoryRemoved(updateThatOverlapsWithLateHistory: DataFrame): DataFrame = {
+    updateThatOverlapsWithLateHistory
+      .withColumn("moved_in" , col("old_moved_in"))
+      .withColumn("moved_out" , col("old_moved_out"))
+      .withColumn("address" , col("old_address"))
+      .drop("old_address" , "old_moved_in" , "old_moved_out")
+  }
+  def buildPotentiallyAddedRowsWhenOverlapping(updateThatOverlapsWithLateHistory: DataFrame): DataFrame = {
+    updateThatOverlapsWithLateHistory
+      .drop("old_address" , "old_moved_in" , "old_moved_out")
+  }
+  def getOldestRowsAdded(updatesOlderThanAllOfHistory : DataFrame) :DataFrame = {
+    updatesOlderThanAllOfHistory
+      .withColumn("moved_out" , col("old_moved_in"))
+      .drop("old_address" , "old_moved_in" , "old_moved_out")
+      .sort("moved_out")
+      .dropDuplicates("moved_in")
+  }
+  def getPotentiallyAddedRowsWhenOldestRecord(updatesOlderThanAllOfHistory : DataFrame): DataFrame = {
+    updatesOlderThanAllOfHistory
+      .drop("old_address" , "old_moved_in" , "old_moved_out")
+  }
 
 }
