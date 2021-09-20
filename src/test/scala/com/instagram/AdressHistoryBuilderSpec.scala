@@ -96,7 +96,7 @@ class AddressHistoryBuilderSpec extends AnyFlatSpec with Matchers with GivenWhen
   val historyUpdatethatisTheFurthestInThePast = Seq(
     addressUpdates(1, "Sayf", "Bouazizi", "Sousse", LocalDate.parse("21-11-1960", pattern))
   ).toDF()
-  val expectedcase = Seq(
+  val oldestCaseExpectedResult = Seq(
     AddressHistory(1, "Sayf", "Bouazizi", "Kasserine", LocalDate.parse("21-11-2020", pattern), null, true),
     AddressHistory(1, "Sayf", "Bouazizi", "France", LocalDate.parse("21-11-2019", pattern), LocalDate.parse("21-11-2020", pattern), false),
     AddressHistory(1, "Sayf", "Bouazizi", "amsterdam", LocalDate.parse("21-11-2015", pattern), LocalDate.parse("21-11-2019", pattern), false),
@@ -135,6 +135,6 @@ class AddressHistoryBuilderSpec extends AnyFlatSpec with Matchers with GivenWhen
     expectedResultOfOldRecordAddedOnSameAddress.collect() should contain theSameElementsAs (result3.collect())
     expectedResultOfNewOnHistory.collect() should contain theSameElementsAs (result4.collect())
     expectedResultOfOverlap.collect() should contain theSameElementsAs (result5.collect())
-    expectedcase.collect() should contain theSameElementsAs(result6.collect())
+    oldestCaseExpectedResult.collect() should contain theSameElementsAs(result6.collect())
   }
 }
